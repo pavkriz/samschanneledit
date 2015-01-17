@@ -1,3 +1,5 @@
+Pavkriz's fork, supports reordering while maintaining original channel numbers (which may lead to "sparse" list).
+
 SamsChannelEditor
 =================
 
@@ -70,7 +72,7 @@ Developers and Collaborators
 
 License
 -------
-    Copyright (C) 2011  Ivan Masmitj‡ Dagas
+    Copyright (C) 2011  Ivan Masmitj√† Dagas
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
