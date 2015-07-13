@@ -17,6 +17,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -156,6 +157,58 @@ namespace SamsChannelEditor
       }
       SortByChanelNum();
       return curix;
+    }
+
+    internal object SetOrderKeepNumbersFrom(string filename)
+    {
+        const short notusedix = 16383;
+        short curix = notusedix;
+        foreach (IChannel ch in this)
+            ch.Number = curix++;
+
+        short maxnum = 0;
+
+        char[] charsToTrim = { ' ', '\t', ',', ';' };
+
+        // assing channels found in text-file the original channel numbers
+        using (var sr = new StreamReader(filename, Encoding.Unicode))
+        {
+            if (sr.ReadLine() != null) // ignore first line
+            {
+                string linia;
+                while ((linia = sr.ReadLine()) != null)
+                {
+                    var num = StringUtils.Copy(linia, 0, 10);
+                    num = num.Trim(charsToTrim);
+                    short origNumber = Convert.ToInt16(num);
+
+                    var name = StringUtils.Copy(linia, 10, 100);
+                    name = name.Trim(charsToTrim);
+
+                    foreach (IChannel ch in this)
+                        if (ch.Number >= notusedix && ch.Name.Equals(name))
+                        {
+                            ch.Number = origNumber;
+                            if (origNumber > maxnum) maxnum = origNumber;
+                            break;
+                        }
+                }
+            }
+            sr.Close();
+        }
+
+        maxnum++;
+
+        // place remaining (new) channels right after them
+        foreach (IChannel ch in this)
+            if (ch.Number >= notusedix)
+            {
+                ch.Number = maxnum++;
+            }
+
+
+        SortByChanelNum();
+        return maxnum;
     }
   }
 }

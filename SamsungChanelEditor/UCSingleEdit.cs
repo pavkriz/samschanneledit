@@ -133,7 +133,7 @@ namespace SamsChannelEditor
         if (ch.Deleted)
           continue;
 
-        ch.Number = idx++;
+        //ch.Number = idx++;
         ch.CalcChecksum(true);
       }
 
@@ -413,6 +413,7 @@ namespace SamsChannelEditor
         mnSaveOrder.Enabled =
         mnRemoveEncrypted.Enabled =
         mnReorderFrom.Enabled = _isChannelFile;
+        mnReorderKeepNumFrom.Enabled = _isChannelFile;
     }
 
     private void mnMoveTo_Click(object sender, EventArgs e)
@@ -542,6 +543,23 @@ namespace SamsChannelEditor
           idx++;
         }
       }
+    }
+
+    private void SortListviewByItemNumbersKeepNums()
+    {
+        IComparer old = listView1.ListViewItemSorter;
+        listView1.ListViewItemSorter = new ListViewItemComparer();
+        listView1.Sort();
+        listView1.ListViewItemSorter = old;
+        //Set channel number according to number in IChannel
+        foreach (ListViewItem lvi in listView1.Items)
+        {
+            if (lvi.Checked)
+            {
+                var ch = (IChannel)(lvi.Tag);
+                lvi.Text = ch.Number.ToString(CultureInfo.InvariantCulture);
+            }
+        }
     }
 
     private void mnRemoveEncrypted_Click(object sender, EventArgs e)
@@ -723,6 +741,25 @@ namespace SamsChannelEditor
       {
         e.NewValue = e.CurrentValue;
       }
+    }
+
+    private void mnReorderKeepNumFrom_Click(object sender, EventArgs e)
+    {
+        if (_currentMapFile == null)
+            return;
+
+        var sfd = new OpenFileDialog
+        {
+            Filter = "Text file (*.txt)|*.txt",
+            AddExtension = true
+        };
+
+        if (sfd.ShowDialog() == DialogResult.OK)
+        {
+            var items = _currentMapFile.Channels.SetOrderKeepNumbersFrom(sfd.FileName);
+            SortListviewByItemNumbersKeepNums();
+            MessageBox.Show(String.Format("The first {0} item(s) were resorted.", items));
+        }
     }
 
   }
